@@ -1,5 +1,6 @@
 from app import *
 from bitcoin import *
+import requests
 
 
 wallets = pymongo_client["wallets"]
@@ -27,7 +28,10 @@ class Wallet():
 		return wallet
 
 	def get_balance(self):
-		return 0
+		res = requests.get("https://blockchain.info/balance?active=%s" % self.address).json()
+
+		balance = res[self.address]["final_balance"]
+		return balance
 
 	def send_money(self, value, address):
 		h = history(self.addres)
