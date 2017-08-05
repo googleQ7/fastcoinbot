@@ -2,7 +2,7 @@ import logging
 import json
 import random
 import codecs
-import tarantool
+import redis
 import os
 import importlib
 
@@ -21,9 +21,6 @@ class Bot:
         self.debug = debug
         self.callback_handlers = {}
 
-        self.X_CID = os.environ["X_CID"]
-        self.X_TOKEN = os.environ["X_TOKEN"]
-
         self.logger.info("Load config")
         self.const = {}
         self.const.update(json.loads(codecs.open("config/init.json", "r", "utf-8").read()))
@@ -35,7 +32,6 @@ class Bot:
         self.telegram.set_update_listener(self.proсess_updates)
 
         self.redis = redis.from_url(os.environ.get("REDIS_URL","redis://localhost:6379"))
-        self.logger = logger
         self.data = {}
 
         self.logger.info("Collect modules")
@@ -55,22 +51,24 @@ class Bot:
         value = json.dumps(value)
         self.redis.set(key, value, kwargs)
         
-        logger.info("user:%s set[%s]>>\"%s\""%(user_id, field, value))
+        self.logger.info("user:%s set[%s]>>\"%s\""%(user_id, field, value))
 
     def user_get(self, user_id, field, default=None):
         key = "user:%s:%s"%(user_id, field)
-        value = self.redis.get(key) or default
+        value = self.redis.get(key)
         if type(value) is bytes: value = value.decode('utf-8')
+            
+        self.logger.info("user:%s get[%s]>>\"%s\""%(user_id, field, value))
         
-        logger.info("user:%s get[%s]>>\"%s\""%(user_id, field, value))
+        if value is None: value = default
+        else: value = json.loads(value)
         
-        if value: value = json.loads(value)
         return value
 
     def user_delete(self, user_id, field):
         key = "user:%s:%s"%(user_id, field)
         self.redis.delete(key)
-        logger.info("user:%s delete[%s]"%(user_id, field))
+        self.logger.info("user:%s delete[%s]"%(user_id, field))
 
 
 

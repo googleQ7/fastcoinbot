@@ -1,24 +1,24 @@
 # -*- coding:utf-8 -*-?
 
 import telebot
+from wallet import Wallet
+
 
 def init(bot):
     bot.handlers["main-menu"] = menu
 
 def menu(bot, message):
-	menu_keyboard = bot.const["admin-menu-keyboard"] if message.u_id in bot.admins else bot.const["menu-keyboard"]
-	MENU_KEYBOARD = bot.get_keyboard(menu_keyboard)
-	MENU_MESSAGE = bot.const["menu-message"]
+	keyboard = bot.get_keyboard("menu-keyboard")
+	menu_message = bot.render_message("menu-message")
+	wallet_message = bot.render_message("wallet-created")
 
-	if message.u_id not in bot.admins and not bot.user_get(message.u_id, "register"):
-		bot.call_handler("reg-start", message)
-		return
+	if not bot.user_get(message.u_id, "wallet"):
+		wallet = Wallet(bot, message.u_id)
 
+		bot.telegram.send_message(message.u_id, wallet_message, reply_markup=keyboard, parse_mode="Markdown")
 
-
-	key = bot.get_key(menu_keyboard, message.text)
-	if key is not None:
-		bot.call_handler(key, message)
-		return
-
-	bot.telegram.send_message(message.u_id, MENU_MESSAGE, reply_markup=MENU_KEYBOARD)
+	key = bot.get_key("menu-keyboard", message.text)
+	if key:
+		bot.call_handler(key, message, forward_flag=False)
+	else:
+		bot.telegram.send_message(message.u_id, menu_message, reply_markup=keyboard)

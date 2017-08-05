@@ -1,25 +1,23 @@
-from app import *
 from bitcoin import *
 import requests
 
-
-wallets = pymongo_client["wallets"]
-COMISSION = app.comission 
-
 class Wallet():
-	def __init__(self, uid):
-		wallet = wallets.find({"uid":uid})
-		if not wallet: wallet = _create_wallet()
-
+	def __init__(self, bot, uid):
+		wallet = bot.user_get(uid, "wallet")
+		if not wallet: 
+			wallet = self._create_wallet(uid)
+			bot.user_set(uid, "wallet", wallet)	 
+			
 		self.address = wallet["address"]
 		self.public = wallet["public"]
 		self.private = wallet["private"]
+		self.comission = bot.const["comission"]
 
-	def _create_wallet(self):
+	def _create_wallet(self, uid):
 		key = random_key()
 		private = sha256(key) 
 		public = privtopub(private)
-		address = pubtoaddr(pub)
+		address = pubtoaddr(public)
 
 		wallet = {"private": private,
 				  "public": public,
@@ -38,8 +36,8 @@ class Wallet():
 		
 		balance = self.get_balance()
 
-		outs = [{'value': value, 'address': address}
-				{'velue': balance - COMISSION, 'address': self.address}]
+		outs = [{'value': value, 'address': address},
+				{'velue': balance - self.comission, 'address': self.address}]
 
 		try:
 			tx = mktx(h, outs)
