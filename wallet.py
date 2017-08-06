@@ -44,12 +44,12 @@ class Wallet():
 			for i in range(len(h)):
 				tx = sign(tx, i, self.private)
 		except Exception:
-			return 1
+			return -1
 		
 		try:
 			bci_pushtx(tx)
 		except Exception:
-			return 2
+			return -2
 
 		return 0
 

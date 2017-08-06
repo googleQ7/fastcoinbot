@@ -10,7 +10,7 @@ def init(bot):
 def menu(bot, message):
 	keyboard = bot.get_keyboard("menu-keyboard")
 	menu_message = bot.render_message("menu-message")
-	wallet_message = bot.render_message("wallet-created")
+	wallet_message = bot.render_message("start")
 
 	if not bot.user_get(message.u_id, "wallet"):
 		wallet = Wallet(bot, message.u_id)

@@ -1,6 +1,8 @@
+import re
+
 def init(bot):
 	bot.handlers["send-money"] = start
-	bot.handlers["get_address"] = get_address
+	bot.handlers["get-address"] = get_address
 	bot.handlers["get-btc"] = get_btc
 	bot.handlers["accpet-sending"] = accept_sending
 
@@ -8,32 +10,55 @@ def init(bot):
 def start(bot, message):
 	get_adsress_message = bot.render_message("get-address")
 	back_to_menu_keyboard = bot.get_keyboard("back-to-menu")
-	bot.set_next_handler(message.u_id, "get_address")
+	bot.set_next_handler(message.u_id, "get-address")
 
-	bot.telegram.send_message(message.u_id, get_adsress_message, reply_markup=back_to_menu_keyboard)
+	bot.telegram.send_message(message.u_id, get_adsress_message, reply_markup=back_to_menu_keyboard, parse_mode="Markdown")
 
 def get_address(bot, message):
-	bot.user_set(message.u_id, "address-to-send", message.text)
+	if not message.forward:
+		incorrect_address_message = bot.render_message("incorrect-address")
+
+		if not re.search("[0-9|a-z|A-Z]{34,34}", message.text):
+			bot.telegram.send_message(message.u_id, incorrect_address_message, parse_mode="Markdown")
+			bot.call_handler("send-money", message)
+			return		
+
+		bot.user_set(message.u_id, "address-to-send", message.text)
 	get_btc_message = bot.render_message("get-btc")
 
 	bot.set_next_handler(message.u_id, "get-btc")
-	bot.telegram.send_message(message.u_id, get_btc_message)
+	bot.telegram.send_message(message.u_id, get_btc_message, parse_mode="Markdown")
 
 def get_btc(bot, message):
-	bot.user_set(message.u_id, "btc-to-send", float(message.text) * 10**8)
+	search_result = re.search("(?P<value>[0-9]{1,}([,.][0-9]){0,1})", message.text)
+	incorrect_value_message = bot.render_message("incorrect-value")
+	
+	if not search_result:
+		bot.telegram.send_message(message.u_id, incorrect_value_message, parse_mode="Markdown")
+		bot.call_handler("get-address", message)
+		return
+
+
+	btc_value = search_resul t.group("value").replace(",", ".")
+	bot.user_set(message.u_id, "btc-to-send", float(btc_value) * 10**8)
 	address = bot.user_get(message.u_id, "address-to-send")
 
-	get_btc_message = bot.render_message("accept-sending", btc=message.text, address=address)
+	accept_sending_message = bot.render_message("accept-sending", btc=btc_value, address=address)
 	accept_keyboard = bot.get_keyboard("warning-to-send")
 
 	bot.set_next_handler(message.u_id, "accpet-sending")
 
-	bot.telegram.send_message(message.u_id, get_btc_message, parse_mode="Markdown",  reply_markup=accept_keyboard)
+	bot.telegram.send_message(message.u_id, accept_sending_message, parse_mode="Markdown",  reply_markup=accept_keyboard)
 
 def accept_sending(bot, message):
+	address = bot.user_get(message.u_id, "address-to-send")
+	btc_value = bot.user_get(message.u_id, "address-to-send")
+
+
 	keyboard = bot.get_keyboard("menu-keyboard")
 	if bot.get_key("warning-to-send", message.text) == "yes":
-		bot.telegram.send_message(message.u_id, "Мани отправлены", parse_mode="Markdown",  reply_markup=keyboard)		
+		wallet.send_money(btc_value, address)
+		bot.telegram.send_message(message.u_id, "Готово!", parse_mode="Markdown",  reply_markup=keyboard)		
 	else:
 		bot.call_handler("main-menu", message)
 		return 
