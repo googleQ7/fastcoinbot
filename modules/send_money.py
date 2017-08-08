@@ -20,7 +20,7 @@ def get_address(bot, message):
 	if not message.forward:
 		incorrect_address_message = bot.render_message("incorrect-address")
 
-		if not re.search("[0-9|a-z|A-Z]{34,34}", message.text):
+		if not re.search("[0-9|a-z|A-Z]{30,34}", message.text):
 			bot.telegram.send_message(message.u_id, incorrect_address_message, parse_mode="Markdown")
 			bot.call_handler("send-money", message)
 			return		

@@ -32,12 +32,15 @@ class Wallet():
 		return balance
 
 	def send_money(self, value, address):
-		h = history(self.address)
+		h = bci_unspent(self.address)
 		
 		balance = self.get_balance()
 
-		outs = [{'value': int(value), 'address': address},
-				{'value': int(balance - (value + self.comission)), 'address': self.address}]
+		if int(balance - (value + self.comission)) == 0:
+			outs = [{'value': int(value), 'address': address}]
+		else:
+			outs = [{'value': int(value), 'address': address},
+					{'value': int(balance - (value + self.comission)), 'address': self.address}]
 
 		try:
 			tx = mktx(h, outs)
@@ -49,7 +52,6 @@ class Wallet():
 		try:
 			bci_pushtx(tx)
 		except Exception as ex:
-			print(outs)
 			return -2
 
 		return 0
