@@ -26,12 +26,14 @@ def get_address(bot, message):
 			return		
 
 		bot.user_set(message.u_id, "address-to-send", message.text)
-	get_btc_message = bot.render_message("get-btc")
+	get_btc_message = bot.render_message("get-btc", comission=wallet.comission)
 
 	bot.set_next_handler(message.u_id, "get-btc")
 	bot.telegram.send_message(message.u_id, get_btc_message, parse_mode="Markdown")
 
 def get_btc(bot, message):
+	wallet = Wallet(bot, message.u_id)
+
 	search_result = re.search("(?P<value>[0-9]{1,}([,.][0-9]{1,}){0,1})", message.text)
 	incorrect_value_message = bot.render_message("incorrect-value")
 	
