@@ -25,6 +25,13 @@ class Wallet():
 
 		return wallet
 
+
+	def get_currency(self):
+		res = requests.get("https://blockchain.info/ticker").json()
+
+		currency = res["RUB"]["buy"]
+		return currency
+
 	def get_balance(self):
 		res = requests.get("https://blockchain.info/balance?active=%s" % self.address).json()
 
