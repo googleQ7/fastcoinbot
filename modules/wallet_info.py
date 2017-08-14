@@ -2,10 +2,10 @@ from wallet import Wallet
 
 
 def init(bot):
-	bot.handlers["wallet-info"] = wallet_info
+	bot.handlers["wallet-info/start"] = start
 
 
-def wallet_info(bot, message):
+def start(bot, message):
 	wallet = Wallet(bot, message.u_id)
 
 	keyboard = bot.get_keyboard("menu-keyboard")

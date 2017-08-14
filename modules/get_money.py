@@ -5,9 +5,9 @@ import io
 
 
 def init(bot):
-	bot.handlers["get-money"] = get_money
+	bot.handlers["get-money/start"] = start
 
-def get_money(bot, message):
+def start(bot, message):
 	wallet = Wallet(bot, message.u_id)
 
 	keyboard = bot.get_keyboard("menu-keyboard")

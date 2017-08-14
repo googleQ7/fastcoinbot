@@ -3,17 +3,17 @@ import re
 from wallet import Wallet
 
 def init(bot):
-	bot.handlers["send-money"] = start
-	bot.handlers["get-address"] = get_address
-	bot.handlers["get-btc"] = get_btc
-	bot.handlers["accpet-sending"] = accept_sending
+	bot.handlers["send-money/start"] = start
+	bot.handlers["send-money/get-address"] = get_address
+	bot.handlers["send-money/get-value"] = get_value
+	bot.handlers["send-money/accpet-sending"] = accept_sending
 
  
 def start(bot, message):
 	get_address_message = bot.render_message("get-address-to-send")
 	back_to_menu_keyboard = bot.get_keyboard("back-to-menu")
 
-	bot.set_next_handler(message.u_id, "get-address")
+	bot.set_next_handler(message.u_id, "send-money/get-address")
 
 	bot.telegram.send_message(message.u_id, get_address_message, reply_markup=back_to_menu_keyboard, parse_mode="Markdown")
 
@@ -29,10 +29,10 @@ def get_address(bot, message):
 
 		bot.user_set(message.u_id, "address-to-send", message.text)
 
-	bot.set_next_handler(message.u_id, "get-btc")
+	bot.set_next_handler(message.u_id, "send-money/get-value")
 	bot.telegram.send_message(message.u_id, get_value_message, parse_mode="Markdown")
 
-def get_btc(bot, message):
+def get_value(bot, message):
 	wallet = Wallet(bot, message.u_id)
 
 	incorrect_value_message = bot.render_message("incorrect-value-tosend")
@@ -41,7 +41,7 @@ def get_btc(bot, message):
 	
 	if not search_result:
 		bot.telegram.send_message(message.u_id, incorrect_value_message, parse_mode="Markdown")
-		bot.call_handler("get-address", message)
+		bot.call_handler("send-money/get-address", message)
 		return
 
 
@@ -52,7 +52,7 @@ def get_btc(bot, message):
 	accept_sending_message = bot.render_message("accept-sending", btc=btc_value, address=address)
 	accept_keyboard = bot.get_keyboard("warning-to-send")
 
-	bot.set_next_handler(message.u_id, "accpet-sending")
+	bot.set_next_handler(message.u_id, "send-money/accpet-sending")
 	bot.telegram.send_message(message.u_id, accept_sending_message, parse_mode="Markdown",  reply_markup=accept_keyboard)
 
 def accept_sending(bot, message):
