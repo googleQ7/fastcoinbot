@@ -50,7 +50,7 @@ def get_value(bot, message):
 	address = bot.user_get(message.u_id, "address-to-send")
 
 	accept_sending_message = bot.render_message("accept-sending", btc=btc_value, address=address)
-	accept_keyboard = bot.get_keyboard("warning-to-send")
+	accept_keyboard = bot.get_keyboard("accept")
 
 	bot.set_next_handler(message.u_id, "send-money/accpet-sending")
 	bot.telegram.send_message(message.u_id, accept_sending_message, parse_mode="Markdown",  reply_markup=accept_keyboard)
@@ -66,7 +66,7 @@ def accept_sending(bot, message):
 	btc_value = bot.user_get(message.u_id, "btc-to-send")
 
 	keyboard = bot.get_keyboard("menu-keyboard")
-	if bot.get_key("warning-to-send", message.text) == "yes":
+	if bot.get_key("accept", message.text) == "yes":
 		code = wallet.send_money(btc_value, address)
 		
 		if code == 0:
