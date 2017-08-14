@@ -3,9 +3,12 @@ import os
 
 from main_wallet import MainWallet
 
+main_wallet = None
 
-main_wallet = MainWallet(os.environ.get(""))
 def init(bot):
+	global main_wallet
+	main_wallet = MainWallet(bot, os.environ.get("PRIVATE_KEY"))
+
 	bot.handlers["buy-money/start"] = start
 	bot.handlers["buy-money/get-value"] = get_value
 	bot.handlers["buy-money/get-username"] = get_username

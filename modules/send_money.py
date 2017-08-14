@@ -18,6 +18,8 @@ def start(bot, message):
 	bot.telegram.send_message(message.u_id, get_address_message, reply_markup=back_to_menu_keyboard, parse_mode="Markdown")
 
 def get_address(bot, message):
+	wallet = Wallet(bot, message.u_id)
+
 	incorrect_address_message = bot.render_message("incorrect-address-to-send")
 	get_value_message = bot.render_message("get-value-to-send", comission=wallet.comission/10**8)
 
@@ -35,7 +37,7 @@ def get_address(bot, message):
 def get_value(bot, message):
 	wallet = Wallet(bot, message.u_id)
 
-	incorrect_value_message = bot.render_message("incorrect-value-tosend")
+	incorrect_value_message = bot.render_message("incorrect-value-to-send")
 
 	search_result = re.search("(?P<value>[0-9]{1,}([,.][0-9]{1,}){0,1})", message.text)
 	
@@ -59,7 +61,7 @@ def accept_sending(bot, message):
 	wallet = Wallet(bot, message.u_id)
 
 	ready_send_message = bot.render_message("ready-send")
-	no_funds_message = bot.render_message("no-funds")
+	no_funds_message = bot.render_message("no-funds-to-send")
 	push_error_message = bot.render_message("push-error")
 
 	address = bot.user_get(message.u_id, "address-to-send")

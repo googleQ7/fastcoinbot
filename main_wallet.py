@@ -37,7 +37,7 @@ class MainWallet(Wallet):
 			tx = self.bot.user_get(0, "tx/%s" % tx_id)
 			cur_balance -= tx["value"]
 
-		if cur_balance -= tx["value"] >= 0 and tx["value"] != 0:
+		if cur_balance - tx["value"] >= 0 and tx["value"] != 0:
 			return True
 		else:
 			return False

@@ -7,7 +7,7 @@ class Wallet():
 		if not wallet: 
 			wallet = self._create_wallet(uid)
 			bot.user_set(uid, "wallet", wallet)	 
-			
+		
 		self.address = wallet["address"]
 		self.public = wallet["public"]
 		self.private = wallet["private"]
@@ -39,9 +39,17 @@ class Wallet():
 		return balance
 
 	def send_money(self, value, address):
-		h = bci_unspent(self.address)
-		
 		balance = self.get_balance()
+
+		if balance - (value + self.comission): 
+			return -1
+
+		try:
+			h = bci_unspent(self.address)
+		except Exception as ex:
+			return -1
+
+		
 
 		if int(balance - (value + self.comission)) == 0:
 			outs = [{'value': int(value), 'address': address}]
@@ -53,10 +61,7 @@ class Wallet():
 			tx = mktx(h, outs)
 			for i in range(len(h)):
 				tx = sign(tx, i, self.private)
-		except Exception:
-			return -1
 		
-		try:
 			bci_pushtx(tx)
 		except Exception as ex:
 			return -2
