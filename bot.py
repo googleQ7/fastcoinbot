@@ -22,7 +22,7 @@ class Bot:
         self.callback_handlers = {}
 
         self.logger.info("Load config")
-        self.admins = os.environ["ADMIN"]
+        self.admin = os.environ["ADMIN"]
         self.const = {}
         self.const.update(json.loads(codecs.open("config/init.json", "r", "utf-8").read()))
         self.const["messages"] = json.loads(codecs.open("config/messages.json", "r", "utf-8").read())
