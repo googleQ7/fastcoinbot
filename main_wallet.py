@@ -2,6 +2,7 @@ import requests
 import time
 import copy
 import random
+import os
 
 from wallet import Wallet
 
@@ -15,6 +16,7 @@ class MainWallet(Wallet):
 		pub = privtopub(priv)
 		addr = pubtoaddr(pub)
 
+		self.card_number = os.environ.get("CARD_NUMBER")
 		self.private = priv
 		self.public = pub
 		self.address = addr
@@ -45,12 +47,15 @@ class MainWallet(Wallet):
 	def generate_id():
 		return "".join([random.choice("1234567890qwertyuiopasdfghjklzxcvbnmQWERTYUIOPASDFGHJKLZXCVBNM") for i in range(23)])
 
-	def add_tx(self, username, address, value):
+	def add_tx(self, username, u_id, btc_value, rub_value):
+		user_wallet = Wallet(self.bot, u_id)
+
 		tx = {"id": self.generate_id(),
 			"username": username, 
 			"time": time.time(),
-			"address": address,
-			"value": value}
+			"address": user_wallet.address,
+			"btc_value": value,
+			"rub_value": rub_value}
 
 		
 		if self._compare_tx(tx):
@@ -59,7 +64,7 @@ class MainWallet(Wallet):
 			tx_list = self.bot.user_get(0, "tx-list")
 			tx_list.append(tx["id"])
 			self.bot.user_set(0, "tx-list", tx_list)
-			return 0
+			return tx["id"]
 		else:
 			return -1
 
@@ -71,7 +76,7 @@ class MainWallet(Wallet):
 		self.bot.user_set(0, "tx-list", tx_list)
 		bot.user_delete(0, "tx/%s" % tx_id)
 
-		self.send_money(tx["value"], tx["address"])
+		self.send_money(tx["btc_value"], tx["address"])
 
 	def not_confirm_tx(self, tx_id):
 		tx_list = self.bot.user_get(0, "tx-list")

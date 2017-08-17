@@ -41,7 +41,7 @@ class Wallet():
 	def send_money(self, value, address):
 		balance = self.get_balance()
 
-		if balance - (value + self.comission): 
+		if balance - (value + self.comission)<0: 
 			return -1
 
 		try:
