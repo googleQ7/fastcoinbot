@@ -1,2 +1,5 @@
 .env
 dump.rdb
+bitcoin/__pycache__
+__pycache__
+modules/__pycache__

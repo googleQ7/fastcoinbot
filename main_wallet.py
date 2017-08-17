@@ -22,6 +22,10 @@ class MainWallet(Wallet):
 		self.address = addr
 		self.comission = bot.const["comission"]
 
+	def get_tx(self, tx_id):
+		tx = self.bot.user_get(0, "tx/%s" % tx_id)
+		return
+		
 	def _compare_all_tx(self):
 		tx_list = self.bot.user_get(0, "tx-list")
 		for tx_id in copy.copy(tx_list):
