@@ -19,22 +19,23 @@ def start(bot, message):
 	get_value_message = bot.render_message("get-value-to-buy")
 	back_to_menu_keyboard = bot.get_keyboard("back-to-menu")
 
-	bot.telegram.send_message(get_value_message, reply_markup=back_to_menu_keyboard)
-	bot.set_next_handler("buy-money/get-value")
+	bot.telegram.send_message(message.u_id, get_value_message, parse_mode="Markdown", reply_markup=back_to_menu_keyboard)
+	bot.set_next_handler(message.u_id, "buy-money/get-value")
 
 def get_value(bot, message):
 	incorrect_value_message = bot.render_message("incorrect-value-to-buy")
 	get_username_message = bot.render_message("get-username-to-buy")
 	back_to_menu_keyboard = bot.get_keyboard("back-to-menu")
 
-	serach_result = re.search("(?P<value>[0-9]{1,}([,.][0-9]{1,}){0,1}).*(?P<corency>(BTC|RUB))", message.text)
+	serach_result = re.search("(?P<value>[0-9]{1,}([,.][0-9]{1,}){0,1}).*(?P<currency>(BTC|RUB))", message.text)
 	if serach_result:
-		value, btc = serach_result.group("value"), serach_result.group("curency")
-		if value == "RUB":
-			rub = btc  
-			btc = btc/main_wallet.get_curency()
+		value, currency = float(serach_result.group("value")), serach_result.group("currency")
+		if currency == "RUB":
+			rub = value
+			btc = value/main_wallet.get_currency()
 		else:
-			rub = btc*main_wallet.get_curency()	
+			btc = value
+			rub = value*main_wallet.get_currency()	
 
 
 		tx = {"rub_value": rub,
@@ -43,10 +44,10 @@ def get_value(bot, message):
 
 		bot.user_set(message.u_id, "buy-btc:tx", tx)
 
-		bot.telegram.send_message(get_username_message, reply_markup=back_to_menu_keyboard)
-		bot.set_next_handler("buy-money/get-username")		
+		bot.telegram.send_message(message.u_id, get_username_message, parse_mode="Markdown", reply_markup=back_to_menu_keyboard)
+		bot.set_next_handler(message.u_id, "buy-money/get-username")		
 	else:
-		bot.telegram.send_message(incorrect_value_message, reply_markup=back_to_menu_keyboard)
+		bot.telegram.send_message(message.u_id, incorrect_value_message, parse_mode="Markdown", reply_markup=back_to_menu_keyboard)
 		bot.call_handler("buy-money/start", message)
 		return
 
@@ -62,19 +63,19 @@ def get_username(bot, message):
 		username = message.text
 		tx["username"] = username
 		
-		tx_id = main_wallet.add_tx(tx["username"], tx["id"], tx["btc"], tx["rub"])
+		tx_id = main_wallet.add_tx(tx["username"], tx["uid"], tx["btc_value"], tx["rub_value"])
 		bot.user_delete(message.u_id, "buy-btc:tx")
 
 		if tx_id == -1:
-			bot.telegram.send_message(tx_creating_error_message, parse_mode="Markdown")
+			bot.telegram.send_message(message.u_id, tx_creating_error_message, parse_mode="Markdown")
 			bot.call_handler("main-menu", message)
 			return
 
 		bot.user_set(message.u_id, "buy-btc:tx-id", tx_id)	
 
-	bot.telegram.send_message(confirm_message, parse_mode="Markdown", reply_markup=confirm_keyboard)
-	bot.telegram.send_message(card_number_message, parse_mode="Markdown", reply_markup=confirm_keyboard)
-	bot.set_next_handler("buy-money/confirm")	
+	bot.telegram.send_message(message.u_id, confirm_message, parse_mode="Markdown", reply_markup=confirm_keyboard)
+	bot.telegram.send_message(message.u_id, card_number_message, parse_mode="Markdown", reply_markup=confirm_keyboard)
+	bot.set_next_handler(message.u_id, "buy-money/confirm")	
 
 def confirm(bot, message):
 	cancelled_message = bot.render_message("tx-cancelled")
@@ -121,4 +122,3 @@ def admin_not_confirm(bot, query):
 								   message_id=query.message.message_id, 
 								   text=tx_info_message,
 								   parse_mode="Markdown")
-
