@@ -11,7 +11,8 @@ def start(bot, message):
 	wallet = Wallet(bot, message.u_id)
 
 	keyboard = bot.get_keyboard("menu-keyboard")
-	info = bot.render_message("get-money", address=wallet.address)
+	info = bot.render_message("get-money")
+	btc_address = bot.render_message("btc-address", address=wallet.address)
 	
 	
 	qr_image = qrcode.make(wallet.address)
@@ -21,4 +22,5 @@ def start(bot, message):
 	qr_file = io.BytesIO(qr_bytes.getvalue())
 
 	bot.telegram.send_message(message.u_id, info, reply_markup = keyboard, parse_mode="Markdown")
+	bot.telegram.send_message(message.u_id, btc_address, reply_markup = keyboard, parse_mode="Markdown")
 	bot.telegram.send_photo(message.u_id, qr_file)
