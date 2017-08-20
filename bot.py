@@ -166,8 +166,8 @@ class Bot:
                     if not item_url is None: keyboard_row.append(telebot.types.InlineKeyboardButton(col[0], url = item_url))
                 elif "--data" in col[1]:
                     data =  params.get(col[1].split("/")[1])
-                    if not item_url is None: 
-                        col[1] = "/".join(col[1].split("/")[0], data)   
+                    if not data is None: 
+                        col[1] = "/".join([col[1].split("/")[0], data])   
                         keyboard_row.append(telebot.types.InlineKeyboardButton(col[0], callback_data = col[1]))
                 else:
                     keyboard_row.append(telebot.types.InlineKeyboardButton(col[0], callback_data = col[1]))

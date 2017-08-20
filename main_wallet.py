@@ -6,15 +6,15 @@ import os
 
 from wallet import Wallet
 
-from bitcoin import *
+import bitcoin
 
 class MainWallet(Wallet):
 	def __init__(self, bot, priv):
 		self.bot = bot
 		self.ttl = 35*60
 
-		pub = privtopub(priv)
-		addr = pubtoaddr(pub)
+		pub = bitcoin.privtopub(priv)
+		addr = bitcoin.pubtoaddr(pub)
 
 		self.card_number = os.environ.get("CARD_NUMBER")
 		self.private = priv
@@ -23,14 +23,19 @@ class MainWallet(Wallet):
 		self.comission = bot.const["comission"]
 
 	def get_tx(self, tx_id):
+		self._compare_all_tx()
 		tx = self.bot.user_get(0, "tx/%s" % tx_id)
-		return
+		return tx
 		
 	def _compare_all_tx(self):
 		tx_list = self.bot.user_get(0, "tx-list", default=[])
 		for tx_id in copy.copy(tx_list):
-			if time.time() <= tx["time"]:
-				bot.uset_delete(0, "tx/%s" % tx_id)
+			tx = self.bot.user_get(0, "tx/%s" % tx_id)
+			if tx:
+				if time.time() - tx["time"] >= self.ttl:
+					self.bot.user_delete(0, "tx/%s" % tx_id)
+					tx_list.remove(tx_id)
+			else:
 				tx_list.remove(tx_id)
 
 		self.bot.user_set(0, "tx-list", tx_list)
@@ -41,8 +46,8 @@ class MainWallet(Wallet):
 		cur_balance = self.get_balance()
 		
 		for tx_id in copy.copy(tx_list):
-			tx = self.bot.user_get(0, "tx/%s" % tx_id)
-			cur_balance -= tx["btc_value"]
+			_tx = self.bot.user_get(0, "tx/%s" % tx_id)
+			cur_balance -= _tx["btc_value"]
 
 		if cur_balance - tx["btc_value"] >= 0 and tx["btc_value"] != 0:
 			return True
@@ -56,10 +61,11 @@ class MainWallet(Wallet):
 		user_wallet = Wallet(self.bot, u_id)
 
 		tx = {"id": self.generate_id(),
-			"username": username, 
+			"username": username,
+			"uid": u_id, 
 			"time": time.time(),
 			"address": user_wallet.address,
-			"btc_value": btc_value,
+			"btc_value": btc_value*10**8,
 			"rub_value": rub_value}
 
 		
@@ -79,14 +85,16 @@ class MainWallet(Wallet):
 		
 		tx_list.remove(tx_id)
 		self.bot.user_set(0, "tx-list", tx_list)
-		bot.user_delete(0, "tx/%s" % tx_id)
+		self.bot.user_delete(0, "tx/%s" % tx_id)
 
+		import pdb; pdb.set_trace()
 		self.send_money(tx["btc_value"], tx["address"])
 
 	def not_confirm_tx(self, tx_id):
 		tx_list = self.bot.user_get(0, "tx-list", default=[])
+		
 		tx = self.bot.user_get(0, "tx/%s" % tx_id)
 		
 		tx_list.remove(tx_id)
 		self.bot.user_set(0, "tx-list", tx_list)
-		bot.user_delete(0, "tx/%s" % tx_id)
+		self.bot.user_delete(0, "tx/%s" % tx_id)
