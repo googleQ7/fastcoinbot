@@ -87,7 +87,6 @@ class MainWallet(Wallet):
 		self.bot.user_set(0, "tx-list", tx_list)
 		self.bot.user_delete(0, "tx/%s" % tx_id)
 
-		import pdb; pdb.set_trace()
 		self.send_money(tx["btc_value"], tx["address"])
 
 	def not_confirm_tx(self, tx_id):
