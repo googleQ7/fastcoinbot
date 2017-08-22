@@ -1,14 +1,23 @@
 from wallet import Wallet
+from main_wallet import MainWallet
 
 import qrcode
 import io
+import os
 
+main_wallet = None
 
 def init(bot):
+	global main_wallet
+
 	bot.handlers["get-money/start"] = start
+	main_wallet = MainWallet(bot, os.environ.get("PRIVATE_KEY"))
 
 def start(bot, message):
-	wallet = Wallet(bot, message.u_id)
+	if message.u_id != bot.admin:
+		wallet = Wallet(bot, message.u_id)
+	else:
+		wallet = main_wallet
 
 	keyboard = bot.get_keyboard("menu-keyboard")
 	info = bot.render_message("get-money")

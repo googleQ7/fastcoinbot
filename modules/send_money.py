@@ -1,12 +1,19 @@
 import re
+import os
 
 from wallet import Wallet
+from main_wallet import MainWallet
+
+main_wallet = None
 
 def init(bot):
+	global main_wallet
+	
 	bot.handlers["send-money/start"] = start
 	bot.handlers["send-money/get-address"] = get_address
 	bot.handlers["send-money/get-value"] = get_value
 	bot.handlers["send-money/accpet-sending"] = accept_sending
+	main_wallet = MainWallet(bot, os.environ.get("PRIVATE_KEY"))
 
  
 def start(bot, message):
@@ -18,7 +25,10 @@ def start(bot, message):
 	bot.telegram.send_message(message.u_id, get_address_message, reply_markup=back_to_menu_keyboard, parse_mode="Markdown")
 
 def get_address(bot, message):
-	wallet = Wallet(bot, message.u_id)
+	if message.u_id != bot.admin:
+		wallet = Wallet(bot, message.u_id)
+	else:
+		wallet = main_wallet
 
 	incorrect_address_message = bot.render_message("incorrect-address-to-send")
 	get_value_message = bot.render_message("get-value-to-send", comission=wallet.comission/10**8)
@@ -35,7 +45,10 @@ def get_address(bot, message):
 	bot.telegram.send_message(message.u_id, get_value_message, parse_mode="Markdown")
 
 def get_value(bot, message):
-	wallet = Wallet(bot, message.u_id)
+	if message.u_id != bot.admin:
+		wallet = Wallet(bot, message.u_id)
+	else:
+		wallet = main_wallet
 
 	incorrect_value_message = bot.render_message("incorrect-value-to-send")
 
@@ -58,7 +71,10 @@ def get_value(bot, message):
 	bot.telegram.send_message(message.u_id, accept_sending_message, parse_mode="Markdown",  reply_markup=accept_keyboard)
 
 def accept_sending(bot, message):
-	wallet = Wallet(bot, message.u_id)
+	if message.u_id != bot.admin:
+		wallet = Wallet(bot, message.u_id)
+	else:
+		wallet = main_wallet
 
 	ready_send_message = bot.render_message("ready-send")
 	no_funds_message = bot.render_message("no-funds-to-send")

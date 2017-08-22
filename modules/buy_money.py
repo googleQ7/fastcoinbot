@@ -85,7 +85,11 @@ def confirm(bot, message):
 	wait_message = bot.render_message("wait-accepting")
 	old_tx_message = bot.render_message("old-tx")
 
-	menu_keyboard = bot.get_keyboard("menu-keyboard")
+	if message.u_id != bot.admin:
+		menu_keyboard = bot.get_keyboard("menu-keyboard")
+	else:
+		menu_keyboard = bot.get_keyboard("admin-menu-keyboard")
+
 	tx_id = bot.user_get(message.u_id, "buy-btc:tx-id")
 	
 	tx = main_wallet.get_tx(tx_id)
@@ -117,7 +121,11 @@ def admin_confirm(bot, query):
 	tx = main_wallet.get_tx(tx_id)
 
 	tx_confirmed_message = bot.render_message("tx-confirmed")
-	menu_keyboard = bot.get_keyboard("menu-keyboard")
+	
+	if query.u_id != bot.admin:
+		menu_keyboard = bot.get_keyboard("menu-keyboard")
+	else:
+		menu_keyboard = bot.get_keyboard("admin-menu-keyboard")
 
 	tx_info_message = bot.render_message("tx-info-for-admin", tx=tx)
 	
@@ -133,7 +141,11 @@ def admin_not_confirm(bot, query):
 	tx = main_wallet.get_tx(tx_id)
 
 	tx_not_confirmed_message = bot.render_message("tx-not-confirmed")
-	menu_keyboard = bot.get_keyboard("menu-keyboard")
+
+	if query.u_id != bot.admin:
+		menu_keyboard = bot.get_keyboard("menu-keyboard")
+	else:
+		menu_keyboard = bot.get_keyboard("admin-menu-keyboard")
 
 	tx_info_message = bot.render_message("tx-info-for-admin", tx=tx)
 	

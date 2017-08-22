@@ -1,12 +1,21 @@
 from wallet import Wallet
+from main_wallet import MainWallet
 
+import os
+
+main_wallet = None
 
 def init(bot):
+	global main_wallet
+	
 	bot.handlers["wallet-info/start"] = start
-
+	main_wallet = MainWallet(bot, os.environ.get("PRIVATE_KEY"))
 
 def start(bot, message):
-	wallet = Wallet(bot, message.u_id)
+	if message.u_id != bot.admin:
+		wallet = Wallet(bot, message.u_id)
+	else:
+		wallet = main_wallet
 
 	keyboard = bot.get_keyboard("menu-keyboard")
 	balance = wallet.get_balance()/10**8

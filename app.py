@@ -38,7 +38,7 @@ def set_webhook():
     bot.logger.info("Webhook set")
     return "Webhook setted", 200
     
-bot = Bot(debug=False)
+bot = Bot(debug=True)
 
 
 if __name__=="__main__": app.run(port=8080)
