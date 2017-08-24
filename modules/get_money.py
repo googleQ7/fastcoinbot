@@ -19,7 +19,11 @@ def start(bot, message):
 	else:
 		wallet = main_wallet
 
-	keyboard = bot.get_keyboard("menu-keyboard")
+	if message.u_id != bot.admin:
+		menu_keyboard = bot.get_keyboard("menu-keyboard")
+	else:
+		menu_keyboard = bot.get_keyboard("admin-menu-keyboard")
+
 	info = bot.render_message("get-money")
 	btc_address = bot.render_message("btc-address", address=wallet.address)
 	
@@ -30,6 +34,6 @@ def start(bot, message):
 	
 	qr_file = io.BytesIO(qr_bytes.getvalue())
 
-	bot.telegram.send_message(message.u_id, info, reply_markup = keyboard, parse_mode="Markdown")
-	bot.telegram.send_message(message.u_id, btc_address, reply_markup = keyboard, parse_mode="Markdown")
+	bot.telegram.send_message(message.u_id, info, reply_markup = menu_keyboard, parse_mode="Markdown")
+	bot.telegram.send_message(message.u_id, btc_address, reply_markup = menu_keyboard, parse_mode="Markdown")
 	bot.telegram.send_photo(message.u_id, qr_file)
