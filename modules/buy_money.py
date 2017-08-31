@@ -59,6 +59,7 @@ def get_username(bot, message):
 	tx = bot.user_get(message.u_id, "buy-btc:tx")
 
 	confirm_message = bot.render_message("pending-payment", btc=tx["btc_value"], rub=tx["rub_value"])
+	card_number_message = bot.render_message("card-number", cards=main_wallet.cards)
 
 	tx_creating_error_message = bot.render_message("tx-creating-error")
 	confirm_keyboard = bot.get_keyboard("confirm-purchase")
@@ -78,11 +79,7 @@ def get_username(bot, message):
 		bot.user_set(message.u_id, "buy-btc:tx-id", tx_id)	
 
 	bot.telegram.send_message(message.u_id, confirm_message, parse_mode="Markdown", reply_markup=confirm_keyboard)
-	
-	for card in main_wallet.cards:
-		card_number_message = bot.render_message("card-number", card=card)
-		bot.telegram.send_message(message.u_id, card_number_message, parse_mode="Markdown", reply_markup=confirm_keyboard)
-	
+	bot.telegram.send_message(message.u_id, card_number_message, parse_mode="Markdown", reply_markup=confirm_keyboard)
 
 	bot.set_next_handler(message.u_id, "buy-money/confirm")	
 
@@ -128,12 +125,9 @@ def admin_confirm(bot, query):
 
 	tx_confirmed_message = bot.render_message("tx-confirmed")
 	
-	if query.u_id != bot.admin:
-		menu_keyboard = bot.get_keyboard("menu-keyboard")
-	else:
-		menu_keyboard = bot.get_keyboard("admin-menu-keyboard")
-
-	tx_info_message = bot.render_message("tx-info-for-admin", tx=tx)
+	menu_keyboard = bot.get_keyboard("menu-keyboard")
+	
+	tx_info_message = bot.render_message("tx-info-for-admin", tx=tx, state=1)
 	
 	main_wallet.confirm_tx(tx_id)
 	bot.telegram.send_message(tx["uid"], tx_confirmed_message, parse_mode="Markdown",  reply_markup=menu_keyboard)
@@ -148,12 +142,10 @@ def admin_not_confirm(bot, query):
 
 	tx_not_confirmed_message = bot.render_message("tx-not-confirmed")
 
-	if query.u_id != bot.admin:
-		menu_keyboard = bot.get_keyboard("menu-keyboard")
-	else:
-		menu_keyboard = bot.get_keyboard("admin-menu-keyboard")
+	
+	menu_keyboard = bot.get_keyboard("menu-keyboard")
 
-	tx_info_message = bot.render_message("tx-info-for-admin", tx=tx)
+	tx_info_message = bot.render_message("tx-info-for-admin", tx=tx, state=2)
 	
 	main_wallet.not_confirm_tx(tx_id)
 	bot.telegram.send_message(tx["uid"], tx_not_confirmed_message, parse_mode="Markdown",  reply_markup=menu_keyboard)
