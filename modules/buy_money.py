@@ -19,7 +19,7 @@ def init(bot):
 
 
 def start(bot, message):
-	get_value_message = bot.render_message("get-value-to-buy")
+	get_value_message = bot.render_message("get-value-to-buy", currency=main_wallet.get_currency())
 	back_to_menu_keyboard = bot.get_keyboard("back-to-menu")
 
 	bot.telegram.send_message(message.u_id, get_value_message, parse_mode="Markdown", reply_markup=back_to_menu_keyboard)
@@ -30,6 +30,8 @@ def get_value(bot, message):
 	get_username_message = bot.render_message("get-username-to-buy")
 	back_to_menu_keyboard = bot.get_keyboard("back-to-menu")
 
+
+	message.text = message.text.upper()
 	serach_result = re.search("(?P<value>[0-9]{1,}([,.][0-9]{1,}){0,1}).*(?P<currency>(BTC|RUB))", message.text)
 	if serach_result:
 		value, currency = float(serach_result.group("value")), serach_result.group("currency")
