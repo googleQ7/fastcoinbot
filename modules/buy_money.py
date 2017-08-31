@@ -17,7 +17,6 @@ def init(bot):
 	bot.callback_handlers["admin-confirm-tx"] = admin_confirm
 	bot.callback_handlers["admin-not-confirm-tx"] = admin_not_confirm
 
-
 def start(bot, message):
 	get_value_message = bot.render_message("get-value-to-buy", currency=main_wallet.get_currency())
 	back_to_menu_keyboard = bot.get_keyboard("back-to-menu")
@@ -60,7 +59,7 @@ def get_username(bot, message):
 	tx = bot.user_get(message.u_id, "buy-btc:tx")
 
 	confirm_message = bot.render_message("pending-payment", btc=tx["btc_value"], rub=tx["rub_value"])
-	card_number_message = bot.render_message("card-number", number=main_wallet.card_number)
+
 	tx_creating_error_message = bot.render_message("tx-creating-error")
 	confirm_keyboard = bot.get_keyboard("confirm-purchase")
 
@@ -79,7 +78,12 @@ def get_username(bot, message):
 		bot.user_set(message.u_id, "buy-btc:tx-id", tx_id)	
 
 	bot.telegram.send_message(message.u_id, confirm_message, parse_mode="Markdown", reply_markup=confirm_keyboard)
-	bot.telegram.send_message(message.u_id, card_number_message, parse_mode="Markdown", reply_markup=confirm_keyboard)
+	
+	for card in main_wallet.cards:
+		card_number_message = bot.render_message("card-number", card=card)
+		bot.telegram.send_message(message.u_id, card_number_message, parse_mode="Markdown", reply_markup=confirm_keyboard)
+	
+
 	bot.set_next_handler(message.u_id, "buy-money/confirm")	
 
 def confirm(bot, message):

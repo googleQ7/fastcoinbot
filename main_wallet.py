@@ -3,6 +3,7 @@ import time
 import copy
 import random
 import os
+import json
 
 from wallet import Wallet
 
@@ -16,7 +17,7 @@ class MainWallet(Wallet):
 		pub = bitcoin.privtopub(priv)
 		addr = bitcoin.pubtoaddr(pub)
 
-		self.card_number = os.environ.get("CARD_NUMBER")
+		self.cards = [{"name":name, "number":number} for name, number in zip(bot.const["banks"], os.environ.get("CARD_NUMBER").split(";"))]
 		self.private = priv
 		self.public = pub
 		self.address = addr
